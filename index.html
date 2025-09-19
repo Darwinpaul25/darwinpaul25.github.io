@@ -10,7 +10,10 @@
     <div class="container">
       <header class="header">
         <h1>BMI Calculator</h1>
-        <p class="subtitle">Body Mass Index (BMI) is a measure of body fat based on height and weight</p>
+        <p class="subtitle">
+          Body Mass Index (BMI) is a measure of body fat based on height and
+          weight
+        </p>
         <div class="header-decoration">
           <span class="decoration-dot"></span>
           <span class="decoration-line"></span>
@@ -20,27 +23,32 @@
       <div class="bmi-container">
         <div class="calculator-section">
           <div class="unit-switcher">
-            <button class="unit-btn active" onclick="switchUnits('metric')">Metric Units</button>
-            <button class="unit-btn" onclick="switchUnits('us')">US Units</button>
+            <button class="unit-btn active" onclick="switchUnits('metric')">
+              Metric Units
+            </button>
+            <button class="unit-btn" onclick="switchUnits('us')">
+              US Units
+            </button>
           </div>
 
-        <div class="input-group">
-          <label>Height</label>
-          <div class="input-wrapper">
-            <input type="number" id="height" value="0" />
-            <span class="input-unit">cm</span>
+          <div class="input-group">
+            <label>Height</label>
+            <div class="input-wrapper">
+              <input type="number" id="height" value="0" />
+              <span class="input-unit">cm</span>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label>Weight</label>
+            <div class="input-wrapper">
+              <input type="number" id="weight" value="0" />
+              <span class="input-unit">kg</span>
+            </div>
           </div>
         </div>
 
-        <div class="input-group">
-          <label>Weight</label>
-          <div class="input-wrapper">
-            <input type="number" id="weight" value="0" />
-            <span class="input-unit">kg</span>
-          </div>
-        </div>
-
-        <div class="result">
+        <div class="result-section">
           <div class="result-header">Your BMI Results</div>
 
           <div class="bmi-display">
@@ -68,18 +76,18 @@
                 <span>30</span>
                 <span>35</span>
               </div>
-                          <div class="scale-wrapper">
-              <div class="scale">
-                <div class="scale-section red"></div>
-                <div class="scale-section green"></div>
-                <div class="scale-section yellow"></div>
-                <div class="scale-section red"></div>
+              <div class="scale-wrapper">
+                <div class="scale">
+                  <div class="scale-section red"></div>
+                  <div class="scale-section green"></div>
+                  <div class="scale-section yellow"></div>
+                  <div class="scale-section red"></div>
+                </div>
+                <div class="scale-pointer">
+                  <div class="pointer-line"></div>
+                  <div class="pointer-dot"></div>
+                </div>
               </div>
-              <div class="scale-pointer">
-                <div class="pointer-line"></div>
-                <div class="pointer-dot"></div>
-              </div>
-            </div>
             </div>
           </div>
 

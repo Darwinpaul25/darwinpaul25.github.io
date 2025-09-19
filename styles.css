@@ -96,6 +96,29 @@ body {
   margin: 0.5rem auto;
   backdrop-filter: blur(10px);
 }
+
+.bmi-container {
+  display: flex;
+  gap: 2rem;
+  flex-direction: column;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .bmi-container {
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .calculator-section,
+  .result-section {
+    flex: 1;
+    min-width: 0;
+    width: 50%;
+  }
+}
+
 .calculator-wrapper {
   display: grid;
   gap: 2.5rem;
@@ -126,16 +149,13 @@ h1 {
 }
 
 .calculator-section {
-  padding: clamp(1rem, 4vw, 2rem);
+  padding: clamp(1.5rem, 4vw, 2rem);
   background: white;
   border-radius: clamp(12px, 2vw, 16px);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.calculator {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
-  gap: clamp(1.25rem, 4vw, 2rem);
+  gap: clamp(1.5rem, 4vw, 2rem);
 }
 
 .input-group {
@@ -223,14 +243,13 @@ button:active {
   box-shadow: none;
 }
 
-.result {
+.result-section {
   background: white;
-  padding: clamp(1.25rem, 4vw, 2rem);
+  padding: clamp(1.5rem, 4vw, 2rem);
   border-radius: clamp(12px, 2vw, 16px);
-  height: 100%;
   display: flex;
   flex-direction: column;
-  gap: clamp(1.25rem, 4vw, 2rem);
+  gap: clamp(1.5rem, 4vw, 2rem);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 

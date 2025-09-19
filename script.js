@@ -89,6 +89,27 @@ function calculateBMI() {
     pointerDot.style.left = `${position}%`;
   };
 
+  // Calculate healthy weight range for current height
+  const calculateHealthyWeightRange = () => {
+    const minWeight = 18.5 * (heightInMeters * heightInMeters);
+    const maxWeight = 24.9 * (heightInMeters * heightInMeters);
+    
+    if (currentUnit === "us") {
+      // Convert kg to lbs
+      return {
+        min: (minWeight * 2.20462).toFixed(1),
+        max: (maxWeight * 2.20462).toFixed(1),
+        unit: "lbs"
+      };
+    } else {
+      return {
+        min: minWeight.toFixed(1),
+        max: maxWeight.toFixed(1),
+        unit: "kg"
+      };
+    }
+  };
+
   if (bmi < 18.5) {
     category = "Underweight";
     color = "#ff5252";
@@ -116,8 +137,16 @@ function calculateBMI() {
 
   // Calculate and display Ponderal Index
   const ponderalIndex = (weight / Math.pow(heightInMeters, 3)).toFixed(1);
-  document.querySelector("#ponderal-index").textContent =
-    `${ponderalIndex} kg/m³`;
+  document.querySelector("#ponderal-index").textContent = `${ponderalIndex} kg/m³`;
+
+  // Update Healthy BMI Range display (this is constant)
+  const healthyBmiRange = document.querySelector('.info-item:nth-child(3) span');
+  healthyBmiRange.textContent = "18.5 kg/m² - 24.9 kg/m²";
+
+  // Update Healthy Weight Range
+  const healthyWeight = calculateHealthyWeightRange();
+  const healthyWeightRange = document.querySelector('.info-item:nth-child(4) span');
+  healthyWeightRange.textContent = `${healthyWeight.min} - ${healthyWeight.max} ${healthyWeight.unit}`;
 }
 
 // Initialize everything when the DOM is loaded
