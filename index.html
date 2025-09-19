@@ -8,52 +8,90 @@
   </head>
   <body>
     <div class="container">
-      <h1>BMI Calculator</h1>
-      <div class="calculator">
-        <div class="unit-selector">
-          <label class="radio-label">
-            <input
-              type="radio"
-              name="units"
-              value="metric"
-              checked
-              onchange="switchUnits()"
-            />
-            Metric (cm/kg)
-          </label>
-          <label class="radio-label">
-            <input
-              type="radio"
-              name="units"
-              value="imperial"
-              onchange="switchUnits()"
-            />
-            Imperial (ft-in/lbs)
-          </label>
-        </div>
-        <div class="input-group" id="metric-height">
-          <label for="height">Height (cm)</label>
-          <input type="number" id="height" placeholder="Enter height" />
-        </div>
-        <div class="input-group imperial-inputs" id="imperial-height">
-          <label>Height (ft & in)</label>
-          <div class="imperial-height">
-            <input type="number" id="height-feet" placeholder="Feet" />
-            <input type="number" id="height-inches" placeholder="Inches" />
+            <div class="bmi-container">
+        <div class="calculator-section">
+          <div class="unit-switcher">
+            <button class="unit-btn active" onclick="switchUnits('metric')">Metric Units</button>
+            <button class="unit-btn" onclick="switchUnits('us')">US Units</button>
+          </div>
+
+        <div class="input-group">
+          <label>Height</label>
+          <div class="input-wrapper">
+            <input type="number" id="height" value="0" />
+            <span class="input-unit">cm</span>
           </div>
         </div>
-        <div class="input-group" id="metric-weight">
-          <label for="weight">Weight (kg)</label>
-          <input type="number" id="weight" placeholder="Enter weight" />
+
+        <div class="input-group">
+          <label>Weight</label>
+          <div class="input-wrapper">
+            <input type="number" id="weight" value="0" />
+            <span class="input-unit">kg</span>
+          </div>
         </div>
-        <div class="input-group imperial-inputs" id="imperial-weight">
-          <label for="weight-pounds">Weight (lbs)</label>
-          <input type="number" id="weight-pounds" placeholder="Enter weight" />
-        </div>
-        <button onclick="calculateBMI()">Calculate BMI</button>
-        <div id="result" class="result">
-          <p>Your BMI: <span id="bmi-value">-</span></p>
-          <p>Category: <span id="bmi-category">-</span></p>
+
+        <div class="result">
+          <div class="result-header">Your BMI Results</div>
+
+          <div class="bmi-display">
+            <div class="bmi-number">
+              <span id="bmi-value">-</span>
+              <span class="bmi-unit">kg/m<sup>2</sup></span>
+            </div>
+            <div class="category-display">
+              <span id="bmi-category">-</span>
+            </div>
+          </div>
+
+          <div class="bmi-scale">
+            <div class="scale-labels">
+              <span>Underweight</span>
+              <span>Normal</span>
+              <span>Overweight</span>
+              <span>Obese</span>
+            </div>
+            <div class="scale-container">
+              <div class="scale-numbers">
+                <span>16.5</span>
+                <span>18.5</span>
+                <span>25</span>
+                <span>30</span>
+                <span>35</span>
+              </div>
+                          <div class="scale-wrapper">
+              <div class="scale">
+                <div class="scale-section red"></div>
+                <div class="scale-section green"></div>
+                <div class="scale-section yellow"></div>
+                <div class="scale-section red"></div>
+              </div>
+              <div class="scale-pointer">
+                <div class="pointer-line"></div>
+                <div class="pointer-dot"></div>
+              </div>
+            </div>
+            </div>
+          </div>
+
+          <div class="info">
+            <div class="info-item">
+              <label>BMI Prime</label>
+              <span id="bmi-prime">0</span>
+            </div>
+            <div class="info-item">
+              <label>Ponderal Index</label>
+              <span id="ponderal-index">0 kg/m³</span>
+            </div>
+            <div class="info-item">
+              <label>Healthy BMI Range</label>
+              <span>18.5 kg/m² - 25 kg/m²</span>
+            </div>
+            <div class="info-item">
+              <label>Healthy Weight Range</label>
+              <span>18.5 - 24.9</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
