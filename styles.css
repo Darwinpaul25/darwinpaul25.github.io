@@ -523,92 +523,92 @@ input:focus,
   .result-section {
     flex: 1;
     overflow-y: hidden; /* Prevent scrolling on desktop */
-  }*/
+}
+*/
 
   /* --- Compact spacing rules for desktop --- */
 
   .result-header {
-    padding-bottom: 0.25rem;
-    margin-bottom: 0.25rem;
-  }
-  .bmi-display-container {
-    gap: 0.5rem;
-  }
-  .bmi-display {
-    padding: 0.5rem;
-  }
-  #bmi-value {
-    font-size: 1.8rem;
-  }
-  #bmi-category {
-    padding: 0.2rem 0.6rem;
-    font-size: 0.95rem;
-    margin-top: 0.2rem;
-  }
-  .bmi-scale {
-    padding: 0.5rem;
-    max-height: 70px;
-  }
-  .scale-container {
-    gap: 0.25rem;
-  }
-  .scale {
-    height: 18px;
-  }
-  .info {
-    gap: 0.4rem;
-    padding: 0.6rem;
-  }
-  .info-item {
-    padding-bottom: 0.4rem;
-  }
-  .info-item label {
-    font-size: 0.85rem;
-  }
-  .advice-section {
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-  }
-  .advice-header {
-    padding-bottom: 0.25rem;
-    margin-bottom: 0.25rem;
-  }
-  .calorie-info {
-    gap: 0.4rem;
-    padding: 0.6rem;
-  }
-  .calorie-item {
-    padding-bottom: 0.4rem;
-  }
-  .calorie-item label {
-    font-size: 0.85rem;
-  }
-  .calorie-item span {
-    font-size: 0.95rem;
-  }
-  .fitness-advice {
-    padding: 0.6rem;
-  }
-  .advice-text {
-    line-height: 1.35;
-    font-size: 0.8rem;
-  }
-  .bmi-container {
-    min-height: 80vh;
-    flex-direction: row; /* Aligns the sections side-by-side on desktop */
-    align-items: stretch;
-    gap: var(--gap-md); /* Ensures the gap is present on desktop */
-  }
+  padding-bottom: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+.bmi-display-container {
+  gap: 0.5rem;
+}
+.bmi-display {
+  padding: 0.5rem;
+}
+#bmi-value {
+  font-size: 1.8rem;
+}
+#bmi-category {
+  padding: 0.2rem 0.6rem;
+  font-size: 0.95rem;
+  margin-top: 0.2rem;
+}
+.bmi-scale {
+  padding: 0.5rem;
+  max-height: 70px;
+}
+.scale-container {
+  gap: 0.25rem;
+}
+.scale {
+  height: 18px;
+}
+.info {
+  gap: 0.4rem;
+  padding: 0.6rem;
+}
+.info-item {
+  padding-bottom: 0.4rem;
+}
+.info-item label {
+  font-size: 0.85rem;
+}
+.advice-section {
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.advice-header {
+  padding-bottom: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+.calorie-info {
+  gap: 0.4rem;
+  padding: 0.6rem;
+}
+.calorie-item {
+  padding-bottom: 0.4rem;
+}
+.calorie-item label {
+  font-size: 0.85rem;
+}
+.calorie-item span {
+  font-size: 0.95rem;
+}
+.fitness-advice {
+  padding: 0.6rem;
+}
+.advice-text {
+  line-height: 1.35;
+  font-size: 0.8rem;
+}
+.bmi-container {
+  min-height: 80vh;
+  flex-direction: row; /* Aligns the sections side-by-side on desktop */
+  align-items: stretch;
+  gap: var(--gap-md); /* Ensures the gap is present on desktop */
+}
 
-  .calculator-section {
-    flex: 0.8; /* Takes up approximately 40% of the space */
-  }
+.calculator-section {
+  flex: 0.8; /* Takes up approximately 40% of the space */
+}
 
-  .result-section {
-    flex: 1.2; /* Takes up approximately 60% of the space */
-    overflow-y: hidden;
-  }
-
+.result-section {
+  flex: 1.2; /* Takes up approximately 60% of the space */
+  overflow-y: hidden;
+}
 
 @media (max-width: 899px) {
   .calculator-section,
@@ -1184,6 +1184,7 @@ input:focus,
   .bmi-scale {
     padding: 0.5rem;
     max-height: 70px;
+    overflow: visible;
   }
   .scale-container {
     gap: 0.25rem;
