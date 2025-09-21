@@ -3,47 +3,133 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BMI Calculator</title>
+    <meta
+      name="description"
+      content="An advanced and responsive BMI calculator that provides detailed health metrics, calorie needs, and personalized fitness advice based on your height, weight, age, gender, and activity level."
+    />
+    <title>Advanced BMI Calculator</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="container">
       <header class="header">
         <h1>BMI Calculator</h1>
-        <p class="subtitle">
-          Body Mass Index (BMI) is a measure of body fat based on height and
-          weight
-        </p>
-        <div class="header-decoration">
-          <span class="decoration-dot"></span>
-          <span class="decoration-line"></span>
-          <span class="decoration-dot"></span>
-        </div>
       </header>
       <div class="bmi-container">
         <div class="calculator-section">
-          <div class="unit-switcher">
-            <button class="unit-btn active" onclick="switchUnits('metric')">
+          <div
+            class="unit-switcher"
+            role="radiogroup"
+            aria-labelledby="unit-label"
+          >
+            <span id="unit-label" class="sr-only">Measurement Units</span>
+            <button
+              class="unit-btn active"
+              data-unit="metric"
+              role="radio"
+              aria-checked="true"
+            >
               Metric Units
             </button>
-            <button class="unit-btn" onclick="switchUnits('us')">
+            <button
+              class="unit-btn"
+              data-unit="us"
+              role="radio"
+              aria-checked="false"
+            >
               US Units
             </button>
           </div>
 
-          <div class="input-group">
-            <label>Height</label>
-            <div class="input-wrapper">
-              <input type="number" id="height" value="0" />
-              <span class="input-unit">cm</span>
+          <div class="inputs-container">
+            <div class="input-row">
+              <label for="height">Height</label>
+              <div class="input-wrapper">
+                <input
+                  type="number"
+                  id="height"
+                  placeholder="0"
+                  min="0"
+                  aria-describedby="height-unit"
+                />
+                <span id="height-unit" class="input-unit">cm</span>
+              </div>
             </div>
-          </div>
 
-          <div class="input-group">
-            <label>Weight</label>
-            <div class="input-wrapper">
-              <input type="number" id="weight" value="0" />
-              <span class="input-unit">kg</span>
+            <div class="input-row">
+              <label for="weight">Weight</label>
+              <div class="input-wrapper">
+                <input
+                  type="number"
+                  id="weight"
+                  placeholder="0"
+                  min="0"
+                  aria-describedby="weight-unit"
+                />
+                <span id="weight-unit" class="input-unit">kg</span>
+              </div>
+            </div>
+
+            <div class="input-row">
+              <label for="age">Age</label>
+              <div class="input-wrapper">
+                <input
+                  type="number"
+                  id="age"
+                  placeholder="0"
+                  min="1"
+                  max="120"
+                  aria-describedby="age-unit"
+                />
+                <span id="age-unit" class="input-unit">years</span>
+              </div>
+            </div>
+
+            <div class="input-row">
+              <label id="gender-label">Gender</label>
+              <div
+                class="gender-switcher"
+                role="radiogroup"
+                aria-labelledby="gender-label"
+              >
+                <button
+                  class="gender-btn active"
+                  data-gender="male"
+                  role="radio"
+                  aria-checked="true"
+                >
+                  Male
+                </button>
+                <button
+                  class="gender-btn"
+                  data-gender="female"
+                  role="radio"
+                  aria-checked="false"
+                >
+                  Female
+                </button>
+              </div>
+            </div>
+
+            <div class="input-row">
+              <label for="activity-level">Activity Level</label>
+              <select id="activity-level" class="activity-select">
+                <option value="sedentary">
+                  Sedentary (little/no exercise)
+                </option>
+                <option value="lightly-active">
+                  Lightly Active (light exercise 1-3 days/week)
+                </option>
+                <option value="moderately-active">
+                  Moderately Active (moderate exercise 3-5 days/week)
+                </option>
+                <option value="very-active">
+                  Very Active (hard exercise 6-7 days/week)
+                </option>
+                <option value="extra-active">
+                  Extra Active (very hard exercise, physical job)
+                </option>
+              </select>
             </div>
           </div>
         </div>
@@ -51,64 +137,79 @@
         <div class="result-section">
           <div class="result-header">Your BMI Results</div>
 
-          <div class="bmi-display">
-            <div class="bmi-number">
-              <span id="bmi-value">-</span>
-              <span class="bmi-unit">kg/m<sup>2</sup></span>
+          <div class="bmi-display-container">
+            <div class="bmi-display">
+              <div class="bmi-number">
+                <span id="bmi-value" aria-live="polite">-</span>
+                <span id="bmi-unit-display" class="bmi-unit"
+                  >kg/m<sup>2</sup></span
+                >
+              </div>
+              <div class="category-display">
+                <span id="bmi-category" aria-live="polite">-</span>
+              </div>
             </div>
-            <div class="category-display">
-              <span id="bmi-category">-</span>
-            </div>
-          </div>
 
-          <div class="bmi-scale">
-            <div class="scale-container">
-              <div class="scale-numbers">
-                <span>18.5</span>
-                <span>25</span>
-                <span>30</span>
-                <span>35</span>
-                <span>40</span>
-              </div>
-              <div class="scale">
-                <div class="scale-section normal">
-                  <span class="scale-label">Normal</span>
+            <div class="bmi-scale">
+              <div class="scale-container">
+                <div class="scale-numbers">
+                  <span>18.5</span>
+                  <span>25</span>
+                  <span>30</span>
+                  <span>35</span>
+                  <span>40</span>
                 </div>
-                <div class="scale-section overweight">
-                  <span class="scale-label">Overweight</span>
+                <div class="scale">
+                  <div class="scale-section normal"></div>
+                  <div class="scale-section overweight"></div>
+                  <div class="scale-section obese"></div>
+                  <div class="scale-section severely-obese"></div>
+                  <div class="scale-section morbidly-obese"></div>
                 </div>
-                <div class="scale-section obese">
-                  <span class="scale-label">Obese</span>
+                <div class="scale-pointer">
+                  <div class="pointer-triangle"></div>
                 </div>
-                <div class="scale-section severely-obese">
-                  <span class="scale-label">Severely Obese</span>
-                </div>
-                <div class="scale-section morbidly-obese">
-                  <span class="scale-label">Morbidly Obese</span>
-                </div>
-              </div>
-              <div class="scale-pointer">
-                <div class="pointer-triangle"></div>
               </div>
             </div>
           </div>
 
           <div class="info">
             <div class="info-item">
-              <label>BMI Prime</label>
-              <span id="bmi-prime">0</span>
-            </div>
-            <div class="info-item">
-              <label>Ponderal Index</label>
-              <span id="ponderal-index">0 kg/m³</span>
-            </div>
-            <div class="info-item">
               <label>Healthy BMI Range</label>
-              <span>18.5 kg/m² - 25 kg/m²</span>
+              <span id="healthy-bmi-range">18.5 kg/m² - 25 kg/m²</span>
             </div>
             <div class="info-item">
               <label>Healthy Weight Range</label>
-              <span>18.5 - 24.9</span>
+              <span id="healthy-weight-range">-</span>
+            </div>
+          </div>
+
+          <div class="advice-section">
+            <div class="advice-header">Daily Calorie & Fitness Advice</div>
+
+            <div class="calorie-info">
+              <div class="calorie-item">
+                <label>Maintain Weight</label>
+                <span id="daily-calories" aria-live="polite">-</span>
+              </div>
+              <div class="calorie-item">
+                <label>Weight Loss <small>(~0.5kg/week)</small></label>
+                <span id="weight-loss-calories" aria-live="polite">-</span>
+              </div>
+              <div class="calorie-item">
+                <label>Weight Gain <small>(~0.5kg/week)</small></label>
+                <span id="weight-gain-calories" aria-live="polite">-</span>
+              </div>
+            </div>
+
+            <div class="fitness-advice">
+              <div
+                id="fitness-advice-text"
+                class="advice-text"
+                aria-live="polite"
+              >
+                Enter your details to get personalized fitness advice.
+              </div>
             </div>
           </div>
         </div>

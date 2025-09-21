@@ -1,249 +1,345 @@
-let currentUnit = "metric";
+(function () {
+  "use strict";
 
-// Debounce function to limit the rate at which handleBMIChange is called
-function debounce(func, wait) {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
+  // --- 1. STATE & CONSTANTS ---
+
+  const state = {
+    unit: "metric", // 'metric' or 'us'
+    gender: "male", // 'male' or 'female'
   };
-}
 
-function switchUnits(unit) {
-  // Update active button
-  document
-    .querySelectorAll(".unit-btn")
-    .forEach((btn) => btn.classList.remove("active"));
-  event.target.classList.add("active");
-
-  // Get current values before switching
-  const heightInput = document.querySelector("#height");
-  const weightInput = document.querySelector("#weight");
-  const currentHeight = parseFloat(heightInput.value) || 0;
-  const currentWeight = parseFloat(weightInput.value) || 0;
-
-  // Update unit labels
-  const heightUnit = heightInput.nextElementSibling;
-  const weightUnit = weightInput.nextElementSibling;
-
-  if (unit === "us" && currentUnit === "metric") {
-    // Convert from metric to US
-    heightUnit.textContent = "in";
-    weightUnit.textContent = "lbs";
-    heightInput.value = (currentHeight / 2.54).toFixed(1); // cm to inches
-    weightInput.value = (currentWeight * 2.20462).toFixed(1); // kg to lbs
-  } else if (unit === "metric" && currentUnit === "us") {
-    // Convert from US to metric
-    heightUnit.textContent = "cm";
-    weightUnit.textContent = "kg";
-    heightInput.value = (currentHeight * 2.54).toFixed(1); // inches to cm
-    weightInput.value = (currentWeight / 2.20462).toFixed(1); // lbs to kg
-  }
-
-  currentUnit = unit;
-
-  // Update BMI scale markers
-  const scaleMarkers = document.querySelectorAll(".scale-marker");
-  scaleMarkers.forEach((marker) => {
-    const value = parseFloat(marker.textContent);
-    if (unit === "us") {
-      marker.textContent = (value * 0.0703).toFixed(1); // Convert to lb/in²
-    } else {
-      marker.textContent = (value / 0.0703).toFixed(1); // Convert to kg/m²
-    }
-  });
-
-  handleBMIChange();
-}
-
-function resetResults() {
-  document.querySelector("#bmi-value").textContent = "-";
-  document.querySelector("#bmi-category").textContent = "-";
-  document.querySelector("#healthy-weight").textContent = "-";
-  document.querySelector("#bmi-prime").textContent = "-";
-  document.querySelector("#ponderal-index").textContent = "- kg/m³";
-
-  // Reset pointer position
-  const pointer = document.querySelector(".pointer-triangle");
-  pointer.style.left = "0%";
-}
-
-function updateBMIDisplay(bmi, category, color) {
-  // Update BMI value
-  document.querySelector("#bmi-value").textContent = bmi.toFixed(1);
-
-  // Update category and color
-  const categoryElement = document.querySelector("#bmi-category");
-  categoryElement.textContent = category;
-  categoryElement.style.color = color;
-}
-
-function updatePointer(bmi) {
-  const pointer = document.querySelector(".pointer-triangle");
-
-  // Calculate position percentage (18.5 to 40 is our scale range)
-  let position = ((bmi - 18.5) / (40 - 18.5)) * 100;
-
-  // Clamp position between 0 and 100
-  position = Math.max(0, Math.min(100, position));
-
-  pointer.style.left = `${position}%`;
-}
-
-function getBMICategory(bmi) {
-  if (bmi < 18.5) return { category: "Underweight", color: "#4198ff" };
-  if (bmi < 25) return { category: "Normal", color: "#42d7a0" };
-  if (bmi < 30) return { category: "Overweight", color: "#ffeb3b" };
-  if (bmi < 35) return { category: "Obese", color: "#ffa726" };
-  if (bmi < 40) return { category: "Severely Obese", color: "#ff7043" };
-  return { category: "Morbidly Obese", color: "#ff5252" };
-}
-
-function calculateHealthyWeightRange(heightInMeters) {
-  const minWeight = 18.5 * (heightInMeters * heightInMeters);
-  const maxWeight = 24.9 * (heightInMeters * heightInMeters);
-
-  if (currentUnit === "us") {
-    return {
-      min: (minWeight * 2.20462).toFixed(1),
-      max: (maxWeight * 2.20462).toFixed(1),
-      unit: "lbs",
-    };
-  }
-  return {
-    min: minWeight.toFixed(1),
-    max: maxWeight.toFixed(1),
-    unit: "kg",
+  const CONSTANTS = {
+    CONVERSIONS: {
+      KG_TO_LBS: 2.20462,
+      LBS_TO_KG: 0.453592,
+      CM_TO_IN: 0.393701,
+      IN_TO_CM: 2.54,
+    },
+    BMI_CATEGORIES: {
+      UNDERWEIGHT: {
+        label: "Underweight",
+        color: "#4198ff",
+        range: [0, 18.5],
+      },
+      NORMAL: { label: "Normal", color: "#42d7a0", range: [18.5, 25] },
+      OVERWEIGHT: { label: "Overweight", color: "#ffeb3b", range: [25, 30] },
+      OBESE: { label: "Obese", color: "#ffa726", range: [30, 35] },
+      SEVERELY_OBESE: {
+        label: "Severely Obese",
+        color: "#ff7043",
+        range: [35, 40],
+      },
+      MORBIDLY_OBESE: {
+        label: "Morbidly Obese",
+        color: "#ff5252",
+        range: [40, Infinity],
+      },
+    },
+    ACTIVITY_MULTIPLIERS: {
+      sedentary: 1.2,
+      "lightly-active": 1.375,
+      "moderately-active": 1.55,
+      "very-active": 1.725,
+      "extra-active": 1.9,
+    },
   };
-}
 
-function updateHealthMetrics(bmi, weight, heightInMeters) {
-  // Update BMI Prime
-  const bmiPrime = (bmi / 25).toFixed(2);
-  document.querySelector("#bmi-prime").textContent = bmiPrime;
+  // --- 2. DOM ELEMENT REFERENCES ---
 
-  // Update Ponderal Index with correct units
-  let ponderalIndex, ponderalUnit;
-  if (currentUnit === "us") {
-    // Convert to imperial units (lb/in³)
-    ponderalIndex = ((weight * 0.453592) / Math.pow(heightInMeters, 3)).toFixed(
-      1
-    );
-    ponderalUnit = "lb/in³";
-  } else {
-    ponderalIndex = (weight / Math.pow(heightInMeters, 3)).toFixed(1);
-    ponderalUnit = "kg/m³";
-  }
-  document.querySelector("#ponderal-index").textContent =
-    `${ponderalIndex} ${ponderalUnit}`;
+  const domElements = {
+    unitSwitcher: document.querySelector(".unit-switcher"),
+    genderSwitcher: document.querySelector(".gender-switcher"),
+    heightInput: document.querySelector("#height"),
+    weightInput: document.querySelector("#weight"),
+    ageInput: document.querySelector("#age"),
+    activitySelect: document.querySelector("#activity-level"),
+    heightUnit: document.querySelector("#height-unit"),
+    weightUnit: document.querySelector("#weight-unit"),
+    bmiValue: document.querySelector("#bmi-value"),
+    bmiCategory: document.querySelector("#bmi-category"),
+    bmiUnitDisplay: document.querySelector("#bmi-unit-display"),
+    pointer: document.querySelector(".pointer-triangle"),
+    healthyBmiRange: document.querySelector("#healthy-bmi-range"),
+    healthyWeightRange: document.querySelector("#healthy-weight-range"),
+    dailyCalories: document.querySelector("#daily-calories"),
+    weightLossCalories: document.querySelector("#weight-loss-calories"),
+    weightGainCalories: document.querySelector("#weight-gain-calories"),
+    fitnessAdviceText: document.querySelector("#fitness-advice-text"),
+    allInputs: document.querySelectorAll(
+      'input[type="number"], #activity-level',
+    ),
+  };
 
-  // Update Healthy BMI Range with correct units
-  const healthyBmiRange = document.querySelector(
-    ".info-item:nth-child(3) span"
-  );
-  if (currentUnit === "us") {
-    healthyBmiRange.textContent = "18.5 lb/in² - 24.9 lb/in²";
-  } else {
-    healthyBmiRange.textContent = "18.5 kg/m² - 24.9 kg/m²";
-  }
+  // --- 3. EVENT LISTENERS ---
 
-  // Update Healthy Weight Range
-  const healthyWeight = calculateHealthyWeightRange(heightInMeters);
-  const healthyWeightRange = document.querySelector(
-    ".info-item:nth-child(4) span"
-  );
-  healthyWeightRange.textContent = `${healthyWeight.min} - ${healthyWeight.max} ${healthyWeight.unit}`;
-}
+  function setupEventListeners() {
+    domElements.unitSwitcher.addEventListener("click", handleUnitSwitch);
+    domElements.genderSwitcher.addEventListener("click", handleGenderSwitch);
 
-function handleBMIChange() {
-  // Get input values
-  let height = parseFloat(document.querySelector("#height").value);
-  let weight = parseFloat(document.querySelector("#weight").value);
-
-  // Convert US units to metric
-  if (currentUnit === "us") {
-    height = height * 2.54; // inches to cm
-    weight = weight * 0.453592; // lbs to kg
-  }
-
-  // Check for empty or invalid inputs
-  if (isNaN(height) || isNaN(weight) || height <= 0 || weight <= 0) {
-    resetResults();
-    return;
-  }
-
-  // Calculate BMI
-  const heightInMeters = height / 100;
-  const bmi = weight / (heightInMeters * heightInMeters);
-
-  // Get BMI category and color
-  const { category, color } = getBMICategory(bmi);
-
-  // Update all displays
-  updateBMIDisplay(bmi, category, color);
-  updatePointer(bmi);
-  updateHealthMetrics(bmi, weight, heightInMeters);
-}
-
-// Initialize everything when the DOM is loaded
-document.addEventListener("DOMContentLoaded", () => {
-  // Create a debounced version of handleBMIChange
-  const debouncedBMIChange = debounce(handleBMIChange, 100);
-
-  function resetScale() {
-    // Reset pointer and BMI value/category
-    document.querySelector("#bmi-value").textContent = "-";
-    document.querySelector("#bmi-category").textContent = "-";
-    document.querySelector(".pointer-triangle").style.left = "0%";
-
-    // Reset all metrics with correct units
-    document.querySelector("#bmi-prime").textContent = "-";
-    document.querySelector("#ponderal-index").textContent =
-      currentUnit === "us" ? "- lb/in³" : "- kg/m³";
-
-    const healthyBmiRange = document.querySelector(
-      ".info-item:nth-child(3) span"
-    );
-    healthyBmiRange.textContent =
-      currentUnit === "us"
-        ? "18.5 lb/in² - 24.9 lb/in²"
-        : "18.5 kg/m² - 24.9 kg/m²";
-
-    const healthyWeightRange = document.querySelector(
-      ".info-item:nth-child(4) span"
-    );
-    healthyWeightRange.textContent =
-      currentUnit === "us" ? "0 - 0 lbs" : "0 - 0 kg";
-  }
-
-  // Set up input event listeners for automatic calculation
-  const inputs = document.querySelectorAll('input[type="number"]');
-  inputs.forEach((input) => {
-    const handleInput = () => {
-      if (input.value === "" || input.value === "0") {
-        resetScale();
-      } else {
-        debouncedBMIChange();
-      }
-    };
-
-    // Listen for all relevant input events
-    input.addEventListener("input", handleInput);
-    input.addEventListener("change", handleInput);
-
-    // Handle blur event separately to ensure we have a valid value
-    input.addEventListener("blur", () => {
-      if (input.value === "" || isNaN(parseFloat(input.value))) {
-        input.value = "0";
-        resetScale();
-      }
+    const debouncedCalculate = debounce(calculateAndDisplayResults, 250);
+    domElements.allInputs.forEach((input) => {
+      input.addEventListener("input", debouncedCalculate);
     });
-  });
+  }
 
-  // Initialize with default values
-  handleBMIChange();
-});
+  // --- 4. EVENT HANDLERS ---
+
+  function handleUnitSwitch(e) {
+    const selectedButton = e.target.closest(".unit-btn");
+    if (!selectedButton || selectedButton.dataset.unit === state.unit) return;
+
+    const newUnit = selectedButton.dataset.unit;
+    const oldUnit = state.unit;
+    state.unit = newUnit;
+
+    // Update UI
+    updateSwitcherUI(domElements.unitSwitcher, ".unit-btn", "unit", newUnit);
+    updateInputUnits();
+    convertInputValues(oldUnit, newUnit);
+    calculateAndDisplayResults();
+  }
+
+  function handleGenderSwitch(e) {
+    const selectedButton = e.target.closest(".gender-btn");
+    if (!selectedButton || selectedButton.dataset.gender === state.gender)
+      return;
+
+    const newGender = selectedButton.dataset.gender;
+    state.gender = newGender;
+
+    // Update UI
+    updateSwitcherUI(
+      domElements.genderSwitcher,
+      ".gender-btn",
+      "gender",
+      newGender,
+    );
+    calculateAndDisplayResults();
+  }
+
+  // --- 5. CORE CALCULATION LOGIC ---
+
+  function calculateAndDisplayResults() {
+    const height = parseFloat(domElements.heightInput.value);
+    const weight = parseFloat(domElements.weightInput.value);
+    const age = parseInt(domElements.ageInput.value, 10);
+    const activity = domElements.activitySelect.value;
+
+    if (!height || !weight || height <= 0 || weight <= 0) {
+      resetUI();
+      return;
+    }
+
+    // Convert all values to metric for universal calculation
+    const heightInCm =
+      state.unit === "us" ? height * CONSTANTS.CONVERSIONS.IN_TO_CM : height;
+    const weightInKg =
+      state.unit === "us" ? weight * CONSTANTS.CONVERSIONS.LBS_TO_KG : weight;
+    const heightInM = heightInCm / 100;
+
+    // Perform calculations
+    const bmi = weightInKg / (heightInM * heightInM);
+    const { label: category, color } = getBmiCategory(bmi);
+    const healthyWeight = calculateHealthyWeightRange(heightInM);
+
+    // Update all relevant UI components
+    updateBmiDisplay(bmi, category, color);
+    updatePointer(bmi);
+    updateHealthMetrics(healthyWeight);
+
+    // Calculate and display advice only if age is valid
+    if (!Number.isFinite(age) || age <= 0 || age > 120) {
+      const bmr = calculateBMR(weightInKg, heightInCm, age);
+      const tdee = calculateTDEE(bmr, activity);
+      updateCalorieAdvice(tdee);
+      updateFitnessAdvice(bmi, activity);
+    } else {
+      resetAdviceSections();
+    }
+  }
+
+  function getBmiCategory(bmi) {
+    for (const key in CONSTANTS.BMI_CATEGORIES) {
+      const { label, color, range } = CONSTANTS.BMI_CATEGORIES[key];
+      if (bmi >= range[0] && bmi < range[1]) {
+        return { label, color };
+      }
+    }
+    return { label: "N/A", color: "#333" };
+  }
+
+  function calculateHealthyWeightRange(heightInM) {
+    const minBmi = CONSTANTS.BMI_CATEGORIES.NORMAL.range[0];
+    const maxBmi = CONSTANTS.BMI_CATEGORIES.NORMAL.range[1] - 0.1; // 24.9
+
+    const minWeightKg = minBmi * heightInM * heightInM;
+    const maxWeightKg = maxBmi * heightInM * heightInM;
+
+    if (state.unit === "us") {
+      return {
+        min: (minWeightKg * CONSTANTS.CONVERSIONS.KG_TO_LBS).toFixed(1),
+        max: (maxWeightKg * CONSTANTS.CONVERSIONS.KG_TO_LBS).toFixed(1),
+      };
+    }
+    return {
+      min: minWeightKg.toFixed(1),
+      max: maxWeightKg.toFixed(1),
+    };
+  }
+
+  function calculateBMR(weightKg, heightCm, age) {
+    // Mifflin-St Jeor Equation
+    if (state.gender === "male") {
+      return 10 * weightKg + 6.25 * heightCm - 5 * age + 5;
+    } else {
+      return 10 * weightKg + 6.25 * heightCm - 5 * age - 161;
+    }
+  }
+
+  function calculateTDEE(bmr, activityLevel) {
+    const multiplier = CONSTANTS.ACTIVITY_MULTIPLIERS[activityLevel] || 1.2;
+    return Math.round(bmr * multiplier);
+  }
+
+  // --- 6. UI UPDATE FUNCTIONS ---
+
+  function updateBmiDisplay(bmi, category, color) {
+    domElements.bmiValue.textContent = bmi.toFixed(1);
+    domElements.bmiCategory.textContent = category;
+    domElements.bmiCategory.style.color = color;
+  }
+
+  function updatePointer(bmi) {
+    const minBmi = 18.5;
+    const maxBmi = 40;
+    const position = ((bmi - minBmi) / (maxBmi - minBmi)) * 100;
+    domElements.pointer.style.left = `${Math.max(0, Math.min(100, position))}%`;
+  }
+
+  function updateHealthMetrics(healthyWeight) {
+    const unitLabel = state.unit === "metric" ? "kg" : "lbs";
+    const bmiUnitLabel =
+      state.unit === "metric" ? "kg/m<sup>2</sup>" : "lb/in<sup>2</sup>";
+
+    domElements.bmiUnitDisplay.innerHTML = bmiUnitLabel;
+    domElements.healthyBmiRange.innerHTML = `18.5 - 24.9 ${bmiUnitLabel}`;
+    domElements.healthyWeightRange.textContent = `${healthyWeight.min} - ${healthyWeight.max} ${unitLabel}`;
+  }
+
+  function updateCalorieAdvice(tdee) {
+    domElements.dailyCalories.textContent = `${tdee} kcal/day`;
+    domElements.weightLossCalories.textContent = `${tdee - 500} kcal/day`;
+    domElements.weightGainCalories.textContent = `${tdee + 500} kcal/day`;
+  }
+
+  function getFitnessAdvice(bmi, activityLevel) {
+    let advice = "";
+    if (bmi < 18.5) {
+      advice =
+        "Your BMI suggests you are underweight. Focus on strength training to build muscle mass and ensure a nutrient-rich diet. Consulting a nutritionist is recommended for healthy weight gain.";
+    } else if (bmi < 25) {
+      advice =
+        "You are in a healthy weight range! Maintain this by combining regular cardiovascular exercise with strength training 2-3 times a week. A balanced diet is key.";
+    } else if (bmi < 30) {
+      advice =
+        "Your BMI is in the overweight category. A combination of consistent cardio (aim for 150+ minutes/week) and strength training, along with a moderate calorie deficit, will be effective.";
+    } else {
+      advice =
+        "Your BMI is in the obese range. It is advisable to start with low-impact exercises like walking, cycling, or swimming. Please consider consulting a healthcare professional for a personalized weight management plan.";
+    }
+    // Add activity-specific advice
+    if (activityLevel === "sedentary") {
+      advice +=
+        " As you have a sedentary lifestyle, try to incorporate more movement into your day, such as taking short walks.";
+    }
+    return advice;
+  }
+
+  function updateFitnessAdvice(bmi, activityLevel) {
+    domElements.fitnessAdviceText.textContent = getFitnessAdvice(
+      bmi,
+      activityLevel,
+    );
+  }
+
+  function resetUI() {
+    domElements.bmiValue.textContent = "-";
+    domElements.bmiCategory.textContent = "-";
+    domElements.bmiCategory.style.color = "inherit";
+    domElements.pointer.style.left = "0%";
+    domElements.healthyWeightRange.textContent = "-";
+    updateInputUnits();
+    resetAdviceSections();
+  }
+
+  function resetAdviceSections() {
+    domElements.dailyCalories.textContent = "-";
+    domElements.weightLossCalories.textContent = "-";
+    domElements.weightGainCalories.textContent = "-";
+    domElements.fitnessAdviceText.textContent =
+      "Enter your details to get personalized fitness advice.";
+  }
+
+  // --- 7. UI HELPER FUNCTIONS ---
+
+  function updateSwitcherUI(container, btnClass, dataAttr, activeValue) {
+    container.querySelectorAll(btnClass).forEach((btn) => {
+      const isActive = btn.dataset[dataAttr] === activeValue;
+      btn.classList.toggle("active", isActive);
+      btn.setAttribute("aria-checked", isActive);
+    });
+  }
+
+  function updateInputUnits() {
+    const isMetric = state.unit === "metric";
+    domElements.heightUnit.textContent = isMetric ? "cm" : "in";
+    domElements.weightUnit.textContent = isMetric ? "kg" : "lbs";
+    const bmiUnitLabel = isMetric ? "kg/m<sup>2</sup>" : "lb/in<sup>2</sup>";
+    domElements.bmiUnitDisplay.innerHTML = bmiUnitLabel;
+    domElements.healthyBmiRange.innerHTML = `18.5 - 24.9 ${bmiUnitLabel}`;
+  }
+
+  function convertInputValues(oldUnit, newUnit) {
+    const height = parseFloat(domElements.heightInput.value);
+    const weight = parseFloat(domElements.weightInput.value);
+
+    if (newUnit === "us" && oldUnit === "metric") {
+      if (height)
+        domElements.heightInput.value = (
+          height * CONSTANTS.CONVERSIONS.CM_TO_IN
+        ).toFixed(1);
+      if (weight)
+        domElements.weightInput.value = (
+          weight * CONSTANTS.CONVERSIONS.KG_TO_LBS
+        ).toFixed(1);
+    } else if (newUnit === "metric" && oldUnit === "us") {
+      if (height)
+        domElements.heightInput.value = (
+          height * CONSTANTS.CONVERSIONS.IN_TO_CM
+        ).toFixed(1);
+      if (weight)
+        domElements.weightInput.value = (
+          weight * CONSTANTS.CONVERSIONS.LBS_TO_KG
+        ).toFixed(1);
+    }
+  }
+
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+
+  // --- 8. INITIALIZATION ---
+
+  document.addEventListener("DOMContentLoaded", () => {
+    setupEventListeners();
+    resetUI();
+  });
+})();
