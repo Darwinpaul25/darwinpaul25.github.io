@@ -3,99 +3,91 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="An advanced and responsive BMI calculator that provides detailed health metrics, calorie needs, and personalized fitness advice based on your height, weight, age, gender, and activity level."
-    />
-    <title>Advanced BMI Calculator</title>
+    <title>BMI Calculator</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="container">
-      <header class="header">
+      <div class="header">
         <h1>BMI Calculator</h1>
-      </header>
+      </div>
       <div class="bmi-container">
         <div class="calculator-section">
-          <div
-            class="unit-switcher"
-            role="radiogroup"
-            aria-labelledby="unit-label"
-          >
-            <span id="unit-label" class="sr-only">Measurement Units</span>
-            <button
-              class="unit-btn active"
-              data-unit="metric"
-              role="radio"
-              aria-checked="true"
-            >
-              Metric Units
-            </button>
-            <button
-              class="unit-btn"
-              data-unit="us"
-              role="radio"
-              aria-checked="false"
-            >
-              US Units
-            </button>
-          </div>
-
           <div class="inputs-container">
             <div class="input-row">
-              <label for="height">Height</label>
+              <div class="unit-switcher">
+                <button
+                  class="unit-btn active"
+                  data-unit="metric"
+                  aria-checked="true"
+                >
+                  Metric Units
+                </button>
+                <button class="unit-btn" data-unit="us" aria-checked="false">
+                  US Units
+                </button>
+              </div>
+            </div>
+            <div class="input-row">
+              <label for="height">
+                Height
+                <span class="sr-only">Enter your height</span>
+              </label>
               <div class="input-wrapper">
                 <input
                   type="number"
                   id="height"
-                  placeholder="0"
+                  name="height"
                   min="0"
-                  aria-describedby="height-unit"
+                  step="0.1"
+                  placeholder="0"
                 />
                 <span id="height-unit" class="input-unit">cm</span>
               </div>
             </div>
-
             <div class="input-row">
-              <label for="weight">Weight</label>
+              <label for="weight">
+                Weight
+                <span class="sr-only">Enter your weight</span>
+              </label>
               <div class="input-wrapper">
                 <input
                   type="number"
                   id="weight"
-                  placeholder="0"
+                  name="weight"
                   min="0"
-                  aria-describedby="weight-unit"
+                  step="0.1"
+                  placeholder="0"
                 />
                 <span id="weight-unit" class="input-unit">kg</span>
               </div>
             </div>
-
             <div class="input-row">
-              <label for="age">Age</label>
+              <label for="age">
+                Age
+                <span class="sr-only">Enter your age</span>
+              </label>
               <div class="input-wrapper">
                 <input
                   type="number"
                   id="age"
+                  name="age"
+                  min="0"
+                  step="1"
                   placeholder="0"
-                  min="1"
-                  max="120"
-                  aria-describedby="age-unit"
                 />
                 <span id="age-unit" class="input-unit">years</span>
               </div>
             </div>
-
             <div class="input-row">
-              <label id="gender-label">Gender</label>
-              <div
-                class="gender-switcher"
-                role="radiogroup"
-                aria-labelledby="gender-label"
-              >
+              <label for="gender">
+                Gender
+                <span class="sr-only">Select your gender</span>
+              </label>
+              <div class="gender-switcher">
                 <button
                   class="gender-btn active"
                   data-gender="male"
-                  role="radio"
                   aria-checked="true"
                 >
                   Male
@@ -103,16 +95,17 @@
                 <button
                   class="gender-btn"
                   data-gender="female"
-                  role="radio"
                   aria-checked="false"
                 >
                   Female
                 </button>
               </div>
             </div>
-
             <div class="input-row">
-              <label for="activity-level">Activity Level</label>
+              <label for="activity-level">
+                Activity Level
+                <span class="sr-only">Select your activity level</span>
+              </label>
               <select id="activity-level" class="activity-select">
                 <option value="sedentary">
                   Sedentary (little/no exercise)
@@ -133,46 +126,42 @@
             </div>
           </div>
         </div>
-
         <div class="result-section">
           <div class="result-header">Your BMI Results</div>
-
           <div class="bmi-display-container">
             <div class="bmi-display">
-              <div class="bmi-number">
-                <span id="bmi-value" aria-live="polite">-</span>
-                <span id="bmi-unit-display" class="bmi-unit"
-                  >kg/m<sup>2</sup></span
-                >
-              </div>
-              <div class="category-display">
-                <span id="bmi-category" aria-live="polite">-</span>
-              </div>
+              <span id="bmi-value">-</span>
+              <span class="bmi-unit" id="bmi-unit-display">kg/m²</span>
+              <div id="bmi-category">-</div>
             </div>
-
-            <div class="bmi-scale">
-              <div class="scale-container">
-                <div class="scale-numbers">
-                  <span>18.5</span>
-                  <span>25</span>
-                  <span>30</span>
-                  <span>35</span>
-                  <span>40</span>
-                </div>
-                <div class="scale">
-                  <div class="scale-section normal"></div>
-                  <div class="scale-section overweight"></div>
-                  <div class="scale-section obese"></div>
-                  <div class="scale-section severely-obese"></div>
-                  <div class="scale-section morbidly-obese"></div>
-                </div>
-                <div class="scale-pointer">
-                  <div class="pointer-triangle"></div>
-                </div>
+          </div>
+          <div class="bmi-scale">
+            <div class="scale-container">
+              <div class="scale">
+                <div class="scale-section normal" style="flex: 1.5"></div>
+                <div class="scale-section overweight" style="flex: 1"></div>
+                <div class="scale-section obese" style="flex: 1"></div>
+                <div
+                  class="scale-section severely-obese"
+                  style="flex: 0.75"
+                ></div>
+                <div
+                  class="scale-section morbidly-obese"
+                  style="flex: 0.75"
+                ></div>
+              </div>
+              <div class="scale-numbers">
+                <span>18.5</span>
+                <span>25</span>
+                <span>30</span>
+                <span>35</span>
+                <span>40</span>
+              </div>
+              <div class="scale-pointer">
+                <div class="pointer-triangle" id="bmiPointer"></div>
               </div>
             </div>
           </div>
-
           <div class="info">
             <div class="info-item">
               <label>Healthy BMI Range</label>
@@ -183,31 +172,26 @@
               <span id="healthy-weight-range">-</span>
             </div>
           </div>
-
           <div class="advice-section">
-            <div class="advice-header">Daily Calorie & Fitness Advice</div>
-
+            <div class="advice-header">
+              Daily Calorie Intake & Fitness Advice
+            </div>
             <div class="calorie-info">
-              <div class="calorie-item">
+              <div class="calorie-item" id="maintain-item">
                 <label>Maintain Weight</label>
-                <span id="daily-calories" aria-live="polite">-</span>
+                <span id="daily-calories">-</span>
               </div>
-              <div class="calorie-item">
-                <label>Weight Loss <small>(~0.5kg/week)</small></label>
-                <span id="weight-loss-calories" aria-live="polite">-</span>
+              <div class="calorie-item" id="loss-item">
+                <label>Weight Loss (~0.5kg/week)</label>
+                <span id="weight-loss-calories">-</span>
               </div>
-              <div class="calorie-item">
-                <label>Weight Gain <small>(~0.5kg/week)</small></label>
-                <span id="weight-gain-calories" aria-live="polite">-</span>
+              <div class="calorie-item" id="gain-item">
+                <label>Weight Gain (~0.5kg/week)</label>
+                <span id="weight-gain-calories">-</span>
               </div>
             </div>
-
             <div class="fitness-advice">
-              <div
-                id="fitness-advice-text"
-                class="advice-text"
-                aria-live="polite"
-              >
+              <div id="fitness-advice-text" class="advice-text">
                 Enter your details to get personalized fitness advice.
               </div>
             </div>

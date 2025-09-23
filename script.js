@@ -66,8 +66,11 @@
     weightGainCalories: document.querySelector("#weight-gain-calories"),
     fitnessAdviceText: document.querySelector("#fitness-advice-text"),
     allInputs: document.querySelectorAll(
-      'input[type="number"], #activity-level',
+      'input[type="number"], #activity-level'
     ),
+    maintainItem: document.querySelector("#daily-calories").parentElement,
+    lossItem: document.querySelector("#weight-loss-calories").parentElement,
+    gainItem: document.querySelector("#weight-gain-calories").parentElement,
   };
 
   // --- 3. EVENT LISTENERS ---
@@ -112,7 +115,7 @@
       domElements.genderSwitcher,
       ".gender-btn",
       "gender",
-      newGender,
+      newGender
     );
     calculateAndDisplayResults();
   }
@@ -148,10 +151,10 @@
     updateHealthMetrics(healthyWeight);
 
     // Calculate and display advice only if age is valid
-    if (!Number.isFinite(age) || age <= 0 || age > 120) {
+    if (Number.isFinite(age) && age > 0 && age <= 120) {
       const bmr = calculateBMR(weightInKg, heightInCm, age);
       const tdee = calculateTDEE(bmr, activity);
-      updateCalorieAdvice(tdee);
+      updateCalorieAdvice(tdee, bmi);
       updateFitnessAdvice(bmi, activity);
     } else {
       resetAdviceSections();
@@ -210,10 +213,15 @@
   }
 
   function updatePointer(bmi) {
-    const minBmi = 18.5;
-    const maxBmi = 40;
-    const position = ((bmi - minBmi) / (maxBmi - minBmi)) * 100;
-    domElements.pointer.style.left = `${Math.max(0, Math.min(100, position))}%`;
+    const minBmi = 18.5; // Start of Normal range
+    const maxBmi = 40; // Practical max for scale
+    const scaleWidth = 100; // Percentage width of the scale
+    const position = ((bmi - minBmi) / (maxBmi - minBmi)) * scaleWidth;
+
+    const pointer = document.getElementById("bmiPointer");
+    if (pointer) {
+      pointer.style.left = `${Math.max(0, Math.min(scaleWidth, position))}%`;
+    }
   }
 
   function updateHealthMetrics(healthyWeight) {
@@ -226,39 +234,82 @@
     domElements.healthyWeightRange.textContent = `${healthyWeight.min} - ${healthyWeight.max} ${unitLabel}`;
   }
 
-  function updateCalorieAdvice(tdee) {
-    domElements.dailyCalories.textContent = `${tdee} kcal/day`;
-    domElements.weightLossCalories.textContent = `${tdee - 500} kcal/day`;
-    domElements.weightGainCalories.textContent = `${tdee + 500} kcal/day`;
+  function updateCalorieAdvice(tdee, bmi) {
+    if (bmi < 18.5) {
+      domElements.weightGainCalories.textContent = `${tdee + 500} kcal/day`;
+      domElements.gainItem.style.display = "flex";
+      domElements.maintainItem.style.display = "none";
+      domElements.lossItem.style.display = "none";
+    } else if (bmi >= 18.5 && bmi < 25) {
+      domElements.dailyCalories.textContent = `${tdee} kcal/day`;
+      domElements.maintainItem.style.display = "flex";
+      domElements.lossItem.style.display = "none";
+      domElements.gainItem.style.display = "none";
+    } else {
+      domElements.weightLossCalories.textContent = `${tdee - 500} kcal/day`;
+      domElements.lossItem.style.display = "flex";
+      domElements.maintainItem.style.display = "none";
+      domElements.gainItem.style.display = "none";
+    }
   }
 
   function getFitnessAdvice(bmi, activityLevel) {
     let advice = "";
+    let activityAdvice = getActivitySpecificAdvice(activityLevel);
+
     if (bmi < 18.5) {
-      advice =
-        "Your BMI suggests you are underweight. Focus on strength training to build muscle mass and ensure a nutrient-rich diet. Consulting a nutritionist is recommended for healthy weight gain.";
-    } else if (bmi < 25) {
-      advice =
-        "You are in a healthy weight range! Maintain this by combining regular cardiovascular exercise with strength training 2-3 times a week. A balanced diet is key.";
-    } else if (bmi < 30) {
-      advice =
-        "Your BMI is in the overweight category. A combination of consistent cardio (aim for 150+ minutes/week) and strength training, along with a moderate calorie deficit, will be effective.";
+      advice = `Your BMI suggests you are underweight. 
+To gain weight healthily, increase your calorie intake with nutrient-rich foods like nuts and avocados. 
+Incorporate strength training 2-3 times weekly to build muscle mass effectively. 
+Ensure a balanced diet with adequate protein and healthy fats. 
+Consult a nutritionist for a tailored plan, and track your progress weekly. 
+${activityAdvice}`;
+    } else if (bmi >= 18.5 && bmi < 25) {
+      advice = `You are in a healthy BMI range—well done! 
+Maintain this with a balanced diet of fruits, vegetables, and lean proteins. 
+Engage in 150 minutes of moderate exercise weekly, mixing cardio and strength training. 
+Monitor your weight monthly to ensure consistency. 
+Stay hydrated and adjust activity if needed to maintain your current weight. 
+${activityAdvice}`;
+    } else if (bmi >= 25 && bmi < 30) {
+      advice = `Your BMI indicates you are overweight. 
+Aim for a moderate calorie deficit with whole foods and smaller portions. 
+Incorporate 150-300 minutes of cardio weekly, like brisk walking or cycling. 
+Strength training can help preserve muscle during weight loss. 
+Seek support from a dietitian for sustainable changes and track your progress. 
+${activityAdvice}`;
     } else {
-      advice =
-        "Your BMI is in the obese range. It is advisable to start with low-impact exercises like walking, cycling, or swimming. Please consider consulting a healthcare professional for a personalized weight management plan.";
-    }
-    // Add activity-specific advice
-    if (activityLevel === "sedentary") {
-      advice +=
-        " As you have a sedentary lifestyle, try to incorporate more movement into your day, such as taking short walks.";
+      advice = `Your BMI is in the obese range, suggesting a need for weight management. 
+Start with a calorie deficit using low-glycemic foods and reduced sugars. 
+Begin with low-impact exercises like walking or swimming for 150 minutes weekly. 
+Consult a healthcare provider for a safe, personalized plan. 
+Track health metrics and celebrate small milestones to stay motivated. 
+${activityAdvice}`;
     }
     return advice;
+  }
+
+  function getActivitySpecificAdvice(activityLevel) {
+    switch (activityLevel) {
+      case "sedentary":
+        return "With a sedentary lifestyle, add 10-minute walks daily to boost activity.";
+      case "lightly-active":
+        return "Enhance your light activity with one extra day of exercise weekly.";
+      case "moderately-active":
+        return "Maintain your routine and vary exercises to avoid plateaus.";
+      case "very-active":
+        return "Focus on recovery with rest days and proper nutrition.";
+      case "extra-active":
+        return "Prioritize stretching and balanced meals to prevent injury.";
+      default:
+        return "";
+    }
   }
 
   function updateFitnessAdvice(bmi, activityLevel) {
     domElements.fitnessAdviceText.textContent = getFitnessAdvice(
       bmi,
-      activityLevel,
+      activityLevel
     );
   }
 
@@ -278,6 +329,9 @@
     domElements.weightGainCalories.textContent = "-";
     domElements.fitnessAdviceText.textContent =
       "Enter your details to get personalized fitness advice.";
+    domElements.maintainItem.style.display = "flex";
+    domElements.lossItem.style.display = "flex";
+    domElements.gainItem.style.display = "flex";
   }
 
   // --- 7. UI HELPER FUNCTIONS ---
